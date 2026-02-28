@@ -13,7 +13,7 @@
 <body>
 <canvas id="c" width="520" height="340"></canvas>
 <div id="caption"></div>
-<div id="hint">click to advance</div>
+<!-- <div id="hint">click to advance</div> -->
 <script>
 const c = document.getElementById('c');
 const ctx = c.getContext('2d');
@@ -115,16 +115,16 @@ function slideTitleCard() {
     ctx.fillStyle = SCREEN_BG;
     ctx.fillRect(140,20,220,155);
     ctx.fillStyle = '#00ff88'; ctx.font = 'bold 11px Comic Sans MS';
-    ctx.fillText('THESIS DEFENSE', 163, 55);
+    ctx.fillText('Thesis Defense', 163, 55);
     ctx.fillStyle = '#fff'; ctx.font = '9px Comic Sans MS';
-    ctx.fillText('Xavier Gonzalez', 175, 80);
+    ctx.fillText('Xavier Gonzalez', 163, 80);
     ctx.fillStyle = '#aaa'; ctx.font = '8px Comic Sans MS';
-    ctx.fillText('Wu Tsai Neurosciences', 155, 100);
-    ctx.fillText('Sequential → Parallel', 158, 116);
-    ctx.fillText('Processing in Neural', 161, 130);
-    ctx.fillText('Population Codes', 167, 144);
+    // ctx.fillText('Wu Tsai Neurosciences', 155, 100);
+    ctx.fillText('an ambitious, passionate, curious human being.', 163, 100);
+    // ctx.fillText('Processing in Neural', 161, 130);
+    // ctx.fillText('Population Codes', 167, 144);
     ctx.fillStyle = '#555'; ctx.font='7px Comic Sans MS';
-    ctx.fillText('advisor: Prof. Linderman', 153, 162);
+    // ctx.fillText('advisor: Prof. Linderman', 153, 162);
   });
 }
 
@@ -304,7 +304,7 @@ function figure(x, y, facing, action, style) {
     ctx.font = '26px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🐱', 0, -76);
+    ctx.fillText('🐱', 0, -65);
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
   } else {
@@ -329,7 +329,7 @@ function bubble(x, y, lines, dir='right') {
   ctx.fillStyle=W; ctx.strokeStyle=B; ctx.lineWidth=2;
   ctx.beginPath(); ctx.roundRect(bx,by,W2,H2,8); ctx.fill(); ctx.stroke();
   ctx.beginPath();
-  if(dir==='right'){ctx.moveTo(bx,by+H2-10);ctx.lineTo(x+5,y-62);ctx.lineTo(bx+15,by+H2-10);}
+  if(dir==='right'){ctx.moveTo(bx,by+H2-7);ctx.lineTo(x+5,y-62);ctx.lineTo(bx+3,by+H2-15);}
   else{ctx.moveTo(bx+W2,by+H2-10);ctx.lineTo(x-5,y-62);ctx.lineTo(bx+W2-15,by+H2-10);}
   ctx.fill(); ctx.stroke();
   ctx.fillStyle=B; ctx.font='11px Comic Sans MS';
@@ -354,6 +354,57 @@ function snowflakes(alpha) {
   pos.forEach(([x,y]) => ctx.fillText('❄',x,y));
 }
 
+// Falling snow animation (only for cold slide)
+const COLD_SLIDE_INDEX = 1;
+let fallingSnow = [];
+let snowAnimationId = null;
+
+function drawScene1Static() {
+  room(0.99);
+  projectorScreen(slideTitleCard);
+  audience(5, 0.9);
+  podium(260, 230);
+  figure(260,230,-1,'talk',lindermanStyle);
+  label(235,290,'Prof. Linderman');
+  cap.textContent = 'room: -10°C. linderman introducing cordially.';
+}
+
+function runFallingSnow() {
+  const SPAWN_RATE = 0.4;
+  const CANVAS_H = 340;
+  const CANVAS_W = 520;
+  if (Math.random() < SPAWN_RATE) {
+    fallingSnow.push({
+      x: Math.random() * CANVAS_W,
+      y: -15,
+      vy: 0.4 + Math.random() * 1.2,
+      size: 10 + Math.random() * 6
+    });
+  }
+  fallingSnow = fallingSnow.filter(f => {
+    f.y += f.vy;
+    return f.y < CANVAS_H + 20;
+  });
+  ctx.fillStyle = 'rgba(180,220,255,0.9)';
+  ctx.font = '14px serif';
+  fallingSnow.forEach(f => {
+    ctx.font = `${f.size}px serif`;
+    ctx.fillText('❄', f.x, f.y);
+  });
+  ctx.font = '14px serif';
+}
+
+function startFallingSnow() {
+  if (snowAnimationId != null) return;
+  function tick() {
+    if (i !== COLD_SLIDE_INDEX) return;
+    drawScene1Static();
+    runFallingSnow();
+    snowAnimationId = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
 const xStyle = {hair:HAIR_X, shirt:SHIRT_X, pants:PANTS, skin:SKIN};
 const lindermanStyle = {hair:HAIR_L2, shirt:SHIRT_L2, pants:'#1a1a1a', skin:SKIN2};
 const narrStyle = {hair:HAIR_N, shirt:SHIRT_N, pants:PANTS, skin:SKIN, cat:true};
@@ -371,34 +422,28 @@ const scenes = [
     for(let gx=175;gx<355;gx+=25){ctx.beginPath();ctx.moveTo(gx,60);ctx.lineTo(gx,240);ctx.stroke();}
     for(let gy=80;gy<240;gy+=30){ctx.beginPath();ctx.moveTo(160,gy);ctx.lineTo(360,gy);ctx.stroke();}
     ctx.fillStyle=B; ctx.font='bold 10px Comic Sans MS';
-    ctx.fillText('WU TSAI NEUROSCIENCES', 163,50);
+    ctx.fillText('Wu Tsai Neurosciences', 163,50);
     // narrator sprinting
     figure(100,240,1,'walk',narrStyle);
-    bubble(100,240,['partiful says:','live thesis defense!!'],'right');
-    cap.textContent = 'spotted on partiful. sprinting there.';
+    bubble(100,240,['partiful says:','live thesis defense :D'],'right');
+    cap.textContent = "am sprinting there.";
   },
-  // 1: inside seminar room, cold, linderman introducing
+  // 1: inside seminar room, cold, linderman introducing (falling snow animation)
   () => {
-    room(0.9);
-    projectorScreen(slideTitleCard);
-    audience(5, 0.9);
-    podium(260, 230);
-    figure(260,230,-1,'talk',lindermanStyle);
-    label(235,290,'Prof. Linderman');
-    snowflakes(0.7);
-    cap.textContent = 'room: -10°C. linderman introducing cordially.';
+    drawScene1Static();
+    startFallingSnow();
   },
   // 2: linderman mentions rm -rf
   () => {
-    room(0.85);
+    room(0.5);
     projectorScreen(slideTitleCard);
     audience(5, 0.85);
     podium(260,230);
     figure(260,230,-1,'talk',lindermanStyle);
     label(235,290,'Prof. Linderman');
-    bubble(260,230,['...and his brilliant','accomplishment:','rm -rf /  in year 2','(llm advice)'],'left');
-    snowflakes(0.5);
-    cap.textContent = 'the room winces collectively';
+    bubble(260,230,['...and his brilliant','accomplishment:','rm -rf','(llm advice)'],'left');
+    // snowflakes(0.5);
+    cap.textContent = 'the room roars with laughter';
   },
   // 3: xavier takes the podium, triumphant smile
   () => {
@@ -409,8 +454,8 @@ const scenes = [
     figure(260,230,-1,'triumph',xStyle);
     label(240,290,'Xavier');
     smileIndicator(310, 155);
-    bubble(260,230,['thank you Prof.','Linderman! today','I will show you...'],'left');
-    snowflakes(0.3);
+    bubble(260,230,['thank you Prof.','Linderman! today','we shall discuss optimization, dynamics and parallelization'],'left');
+    // snowflakes(0.3);
     cap.textContent = 'xavier begins. triumphant smile!';
   },
   // 4: deer elk slide — too long preamble
@@ -511,7 +556,13 @@ const scenes = [
 ];
 
 let i=0;
-function draw(){scenes[i]();}
+function draw(){
+  if (snowAnimationId != null && i !== COLD_SLIDE_INDEX) {
+    cancelAnimationFrame(snowAnimationId);
+    snowAnimationId = null;
+  }
+  scenes[i]();
+}
 draw();
 c.addEventListener('click',()=>{i=(i+1)%scenes.length;draw();});
 </script>

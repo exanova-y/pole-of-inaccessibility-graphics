@@ -2,4 +2,4 @@
 
 turning my journal into svg images
 
-![](defense.png)
+![being and nothingness](being-judgemental.png)
