@@ -279,7 +279,7 @@ function podium(x, y) {
 }
 
 function figure(x, y, facing, action, style) {
-  const { hair=B, shirt=SHIRT_N, pants=PANTS, skin=SKIN, hairlong=false } = style||{};
+  const { hair=B, shirt=SHIRT_N, pants=PANTS, skin=SKIN, hairlong=false, cat=false } = style||{};
   ctx.lineWidth = 3;
   ctx.save(); ctx.translate(x, y);
 
@@ -300,15 +300,23 @@ function figure(x, y, facing, action, style) {
   ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(armL[0],armL[1]); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(armR[0],armR[1]); ctx.stroke();
 
-  ctx.strokeStyle=B; ctx.fillStyle=skin; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.arc(0,-74,13,0,Math.PI*2); ctx.fill(); ctx.stroke();
-
-  ctx.fillStyle=hair;
-  if (hairlong) {
-    ctx.beginPath(); ctx.ellipse(0,-78,14,8,0,Math.PI,0); ctx.fill();
-    ctx.fillRect(-14,-82,5,26); ctx.fillRect(9,-82,5,22);
+  if (cat) {
+    ctx.font = '26px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🐱', 0, -76);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
   } else {
-    ctx.beginPath(); ctx.ellipse(0,-80,13,7,0,Math.PI,0); ctx.fill();
+    ctx.strokeStyle=B; ctx.fillStyle=skin; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(0,-74,13,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=hair;
+    if (hairlong) {
+      ctx.beginPath(); ctx.ellipse(0,-78,14,8,0,Math.PI,0); ctx.fill();
+      ctx.fillRect(-14,-82,5,26); ctx.fillRect(9,-82,5,22);
+    } else {
+      ctx.beginPath(); ctx.ellipse(0,-80,13,7,0,Math.PI,0); ctx.fill();
+    }
   }
   ctx.restore();
 }
@@ -348,7 +356,7 @@ function snowflakes(alpha) {
 
 const xStyle = {hair:HAIR_X, shirt:SHIRT_X, pants:PANTS, skin:SKIN};
 const lindermanStyle = {hair:HAIR_L2, shirt:SHIRT_L2, pants:'#1a1a1a', skin:SKIN2};
-const narrStyle = {hair:HAIR_N, shirt:SHIRT_N, pants:PANTS, skin:SKIN};
+const narrStyle = {hair:HAIR_N, shirt:SHIRT_N, pants:PANTS, skin:SKIN, cat:true};
 
 const scenes = [
   // 0: exterior wu tsai, narrator sprinting

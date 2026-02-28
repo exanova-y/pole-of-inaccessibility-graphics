@@ -13,7 +13,6 @@
 <body>
 <canvas id="c" width="480" height="320"></canvas>
 <div id="caption"></div>
-<div id="hint">click to advance</div>
 <script>
 const c = document.getElementById('c');
 const ctx = c.getContext('2d');
@@ -71,6 +70,10 @@ function room() {
   ctx.fillText('❄', 420, 55);
   ctx.fillText('❄', 408, 70);
 
+  // trans flag in background (on wall)
+  ctx.font = '28px serif';
+  ctx.fillText('🏳️‍⚧️', 395, 30);
+
   // chalkboard
   ctx.fillStyle = BOARD;
   ctx.fillRect(30, 35, 130, 80);
@@ -83,9 +86,8 @@ function room() {
   ctx.fillStyle='#ffffffcc';
   ctx.fillText('philosophy', 40, 60);
   ctx.fillText('of mind', 50, 74);
-  ctx.fillText('——————', 38, 82);
-  ctx.fillText('qualia?', 48, 96);
-  ctx.fillText('functionalism', 36, 108);
+  ctx.fillText('...', 38, 82);
+  ctx.fillText("russell's tpot", 36, 96);
 
   // desk
   ctx.fillStyle = DESK;
@@ -96,14 +98,15 @@ function room() {
   ctx.beginPath(); ctx.moveTo(320,208); ctx.lineTo(320,230); ctx.stroke();
   // book stack on desk
   ctx.fillStyle = BOOK;
-  ctx.fillRect(200, 175, 35, 15); ctx.strokeStyle=B; ctx.lineWidth=1; ctx.strokeRect(200,175,35,15);
+  ctx.fillRect(200, 175, 40, 15); ctx.strokeStyle=B; ctx.lineWidth=1; ctx.strokeRect(200,175,40,15);
   ctx.fillStyle = '#3498db';
   ctx.fillRect(197, 163, 30, 13); ctx.strokeRect(197,163,30,13);
   ctx.fillStyle = '#f39c12';
-  ctx.fillRect(194, 153, 28, 11); ctx.strokeRect(194,153,28,11);
+  ctx.fillRect(194, 153, 40, 11); ctx.strokeRect(194,153,40,11);
   // book titles
   ctx.fillStyle = W; ctx.font = '6px Comic Sans MS';
-  ctx.fillText('Dennett', 202, 185);
+  ctx.fillText('Ben Barres', 197, 160);
+  ctx.fillText('Anti Oedipus', 202, 185);
   ctx.fillText('Chalmers', 198, 173);
 
   // door (left wall)
@@ -122,7 +125,7 @@ function room() {
 // x, y = base center, facing = 1 right -1 left
 // style: {hair, shirt, pants, skin, hairlong}
 function figure(x, y, facing, action, style) {
-  const { hair=B, shirt='#4169E1', pants=PANTS, skin=SKIN, hairlong=false } = style||{};
+  const { hair=B, shirt='#4169E1', pants=PANTS, skin=SKIN, hairlong=false, cat=false } = style||{};
   ctx.lineWidth = 3;
 
   ctx.save();
@@ -160,24 +163,30 @@ function figure(x, y, facing, action, style) {
   ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(armR[0], armR[1]); ctx.stroke();
 
   // head
-  ctx.strokeStyle = B; ctx.fillStyle = skin; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(0, -74, 13, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
-
-  // hair
-  ctx.fillStyle = hair;
-  if (hairlong) {
-    // long hair: arc over head + flowing sides
-    ctx.beginPath();
-    ctx.ellipse(0, -78, 14, 8, 0, Math.PI, 0);
-    ctx.fill();
-    // side strands
-    ctx.fillRect(-14, -82, 5, 26);
-    ctx.fillRect(9, -82, 5, 22);
+  if (cat) {
+    ctx.font = '26px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🐱', 0, -65);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
   } else {
-    ctx.beginPath();
-    ctx.ellipse(0, -80, 13, 7, 0, Math.PI, 0);
-    ctx.fill();
+    ctx.strokeStyle = B; ctx.fillStyle = skin; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, -74, 13, 0, Math.PI*2);
+    ctx.fill(); ctx.stroke();
+    // hair
+    ctx.fillStyle = hair;
+    if (hairlong) {
+      ctx.beginPath();
+      ctx.ellipse(0, -78, 14, 8, 0, Math.PI, 0);
+      ctx.fill();
+      ctx.fillRect(-14, -82, 5, 26);
+      ctx.fillRect(9, -82, 5, 22);
+    } else {
+      ctx.beginPath();
+      ctx.ellipse(0, -80, 13, 7, 0, Math.PI, 0);
+      ctx.fill();
+    }
   }
 
   ctx.restore();
@@ -193,9 +202,9 @@ function bubble(x, y, text, dir='right') {
   // tail
   ctx.beginPath();
   if (dir === 'right') {
-    ctx.moveTo(bx, by+H2-10); ctx.lineTo(x+5, y-62); ctx.lineTo(bx+15, by+H2-10);
+    ctx.moveTo(bx+3, by+H2); ctx.lineTo(x+5, y-62); ctx.lineTo(bx+2, by+H2-10);
   } else {
-    ctx.moveTo(bx+W2, by+H2-10); ctx.lineTo(x-5, y-62); ctx.lineTo(bx+W2-15, by+H2-10);
+    ctx.moveTo(bx+W2, by+H2-5); ctx.lineTo(x-5, y-62); ctx.lineTo(bx+W2-5, by+H2-15);
   }
   ctx.fill(); ctx.stroke();
   ctx.fillStyle = B; ctx.font = '11px Comic Sans MS';
@@ -203,77 +212,81 @@ function bubble(x, y, text, dir='right') {
 }
 
 function label(x, y, text) {
-  ctx.fillStyle = B; ctx.font = 'bold 10px Comic Sans MS';
+  ctx.fillStyle = B; ctx.font = 'bold 14px Comic Sans MS';
   ctx.fillText(text, x, y);
 }
 
 const lindyStyle = { hair: HAIR_L, shirt: SHIRT_L, pants: PANTS_L, skin: SKIN, hairlong: true };
-const narrStyle  = { hair: HAIR_N, shirt: SHIRT_N, pants: PANTS, skin: SKIN };
+const narrStyle  = { hair: HAIR_N, shirt: SHIRT_N, pants: PANTS, skin: SKIN, cat: true };
 
 const scenes = [
   () => {
     room();
     // narrator at door
     figure(57, 220, 1, 'walk', narrStyle);
-    cap.textContent = 'pushing into the psych building...';
+    cap.textContent = 'found the psychology building';
   },
   () => {
     room();
     // narrator inside, lindy at desk
     figure(160, 220, 1, 'listen', narrStyle);
     figure(310, 220, -1, 'talk', lindyStyle);
-    label(125, 270, 'narrator');
-    label(290, 270, 'lindy');
+    label(125, 260, 'me');
+    label(290, 260, 'lindy');
     cap.textContent = 'yuliya\'s "opinionated friend"';
   },
   () => {
     room();
     figure(160, 220, 1, 'listen', narrStyle);
     figure(310, 220, -1, 'talk', lindyStyle);
-    label(125, 270, 'narrator');
-    label(290, 270, 'lindy');
+    label(125, 260, 'me');
+    label(290, 260, 'lindy');
+    // 
     bubble(310, 220, ['continental philosophy', 'is like a tuning fork', 'at a field trip'], 'left');
-    cap.textContent = 'highly observant. categorizes things.';
+    cap.textContent = 'not "judgemental", just a high resolution information processor';
   },
   () => {
     room();
     figure(160, 220, 1, 'talk', narrStyle);
     figure(310, 220, -1, 'listen', lindyStyle);
-    label(125, 270, 'narrator');
-    label(290, 270, 'lindy');
+    label(125, 260, 'me');
+    label(290, 260, 'lindy');
     bubble(160, 220, ['analytic mirrors', 'CS reasoning style'], 'right');
-    cap.textContent = 'notebooks, not tuning forks.';
+    // cap.textContent = 'tuning forks vs notebooks ';
   },
   () => {
     room();
     figure(160, 220, 1, 'talk', narrStyle);
     figure(310, 220, -1, 'listen', lindyStyle);
-    label(125, 270, 'narrator');
-    label(290, 270, 'lindy');
+    // increase the text size:
+    ctx.font = '12px Comic Sans MS';
+    label(125, 260, 'me');
+    label(290, 260, 'lindy');
+  
     // thought bubble for lindy
     ctx.fillStyle = W; ctx.strokeStyle = B; ctx.lineWidth = 2;
     // cloud bubbles
-    [[-8,0],[0,-10],[10,-4],[18,4],[8,10],[-4,8]].forEach(([dx,dy]) => {
+    [[-8,0],[0,-10],[10,-4],[18,4],[8,10],[-2,4]].forEach(([dx,dy]) => {
       ctx.beginPath(); ctx.arc(355+dx, 95+dy, 10, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     });
     ctx.fillStyle = B; ctx.font = '9px Comic Sans MS';
-    ctx.fillText('🗂️ categorizing...', 330, 88);
-    cap.textContent = 'she is filing this conversation';
+    ctx.fillText('deterritorializing...', 330, 88);
+    cap.textContent = 'intense high resolution feature categorization going on';
   },
   () => {
     room();
     figure(230, 220, 1, 'talk', narrStyle);
     figure(310, 220, -1, 'talk', lindyStyle);
-    label(195, 270, 'narrator');
-    label(290, 270, 'lindy');
+    label(195, 260, 'narrator');
+    label(290, 260, 'lindy');
     // snow intensifies outside
     ctx.fillStyle = '#aaddff';
     ctx.font = '12px serif';
     ['❄','❄','❄','❄','❄','❄'].forEach((s,i) => {
       ctx.fillText(s, 343+(i%3)*20, 48+(Math.floor(i/3))*20);
     });
-    bubble(230, 220, ['where is kay?'], 'right');
-    bubble(310, 220, ['out in the', 'chicago winter'], 'left');
+    bubble(230, 220, ['where is kay?'], 'left');
+    bubble(310, 220, ['out in the', 'chicago winter'], 'right');
     cap.textContent = 'kay is not here. people are warm.';
   },
 ];

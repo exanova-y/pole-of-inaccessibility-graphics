@@ -13,7 +13,7 @@
 <body>
 <canvas id="c" width="480" height="320"></canvas>
 <div id="caption"></div>
-<div id="hint">click to advance</div>
+<!-- <div id="hint">click to advance</div> -->
 <script>
 const c = document.getElementById('c');
 const ctx = c.getContext('2d');
@@ -106,10 +106,13 @@ function figure(x, y, facing, action) {
   ctx.strokeStyle = SHIRT;
   ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(0, -60); ctx.stroke();
 
-  // head
-  ctx.strokeStyle = BLACK; ctx.fillStyle = SKIN;
-  ctx.beginPath(); ctx.arc(0, -70, 12, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
+  // head — cat emoji
+  ctx.font = '26px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🐱', 0, -72);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
 
   // legs
   ctx.strokeStyle = PANTS;
@@ -150,7 +153,7 @@ function stars(x, y) {
   }
   ctx.fillStyle = BLACK;
   ctx.font = '13px Comic Sans MS';
-  ctx.fillText('OOF!!', x-18, y-45);
+  ctx.fillText('meow :(', x-18, y-45);
 }
 
 function speechBubble(x, y, text) {
@@ -215,8 +218,8 @@ const scenes = [
     ctx.fillStyle = WHITE; ctx.strokeStyle=BLACK; ctx.lineWidth=2;
     ctx.beginPath(); ctx.roundRect(60, 130, 140, 36, 6); ctx.fill(); ctx.stroke();
     ctx.fillStyle=BLACK; ctx.font='12px Comic Sans MS';
-    ctx.fillText('pole of inaccessibility', 65, 148);
-    ctx.fillText('(door is locked)', 72, 162);
+    ctx.fillText('Pole of inaccessibility', 65, 148);
+    // ctx.fillText('(door is locked)', 72, 162);
     cap.textContent = 'of course it\'s locked';
   },
   () => {
