@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>physics building</title>
+<style>
+  body { margin: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Comic Sans MS', cursive; }
+  canvas { border: 3px solid black; cursor: pointer; image-rendering: pixelated; }
+  #caption { margin-top: 10px; font-size: 18px; color: #333; height: 28px; }
+  #hint { font-size: 13px; color: #888; margin-top: 6px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="480" height="320"></canvas>
+<div id="caption"></div>
+<div id="hint">click to advance</div>
+<script>
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+const cap = document.getElementById('caption');
+
+// MS Paint palette
+const SKY = '#87CEEB';
+const GROUND = '#90EE90';
+const WALL = '#D2B48C';
+const DOOR = '#8B4513';
+const BLACK = '#000000';
+const WHITE = '#FFFFFF';
+const SKIN = '#FFDAB9';
+const SHIRT = '#4169E1';
+const PANTS = '#2F4F4F';
+const STAR = '#FFD700';
+const SIGN = '#FFFFF0';
+
+function clear() {
+  // sky
+  ctx.fillStyle = SKY;
+  ctx.fillRect(0, 0, 480, 200);
+  // ground
+  ctx.fillStyle = GROUND;
+  ctx.fillRect(0, 200, 480, 120);
+  // ground line
+  ctx.strokeStyle = BLACK; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0,200); ctx.lineTo(480,200); ctx.stroke();
+}
+
+function building() {
+  // main wall
+  ctx.fillStyle = WALL;
+  ctx.fillRect(180, 60, 220, 140);
+  ctx.strokeStyle = BLACK; ctx.lineWidth = 3;
+  ctx.strokeRect(180, 60, 220, 140);
+
+  // roof triangle
+  ctx.fillStyle = '#A0522D';
+  ctx.beginPath();
+  ctx.moveTo(170, 60); ctx.lineTo(290, 10); ctx.lineTo(410, 60);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = BLACK; ctx.lineWidth = 3; ctx.stroke();
+
+  // sign
+  ctx.fillStyle = SIGN;
+  ctx.fillRect(200, 75, 160, 28);
+  ctx.strokeStyle = BLACK; ctx.lineWidth = 2;
+  ctx.strokeRect(200, 75, 160, 28);
+  ctx.fillStyle = BLACK;
+  ctx.font = 'bold 11px Comic Sans MS, cursive';
+  ctx.fillText('VARIAN PHYSICS BLDG', 204, 94);
+
+  // door (closed by default, will be drawn in scenes)
+  ctx.fillStyle = DOOR;
+  ctx.fillRect(258, 140, 44, 60);
+  ctx.strokeStyle = BLACK; ctx.lineWidth = 2;
+  ctx.strokeRect(258, 140, 44, 60);
+  // door knob
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath(); ctx.arc(296, 170, 4, 0, Math.PI*2); ctx.fill();
+  ctx.stroke();
+
+  // windows
+  ctx.fillStyle = '#ADD8E6';
+  ctx.fillRect(195, 110, 40, 30); ctx.strokeStyle=BLACK; ctx.lineWidth=2; ctx.strokeRect(195,110,40,30);
+  ctx.fillRect(325, 110, 40, 30); ctx.strokeStyle=BLACK; ctx.lineWidth=2; ctx.strokeRect(325,110,40,30);
+  // window cross
+  ctx.beginPath(); ctx.moveTo(215,110); ctx.lineTo(215,140); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(195,125); ctx.lineTo(235,125); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(345,110); ctx.lineTo(345,140); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(325,125); ctx.lineTo(365,125); ctx.stroke();
+}
+
+// stick figure: x = center base, facing = 1 right, -1 left
+function figure(x, y, facing, action) {
+  ctx.strokeStyle = BLACK;
+  ctx.fillStyle = SKIN;
+  ctx.lineWidth = 3;
+
+  let ox = 0, oy = 0, tilt = 0;
+  if (action === 'bump') { ox = -4*facing; tilt = 0.18*facing; }
+  if (action === 'walk') { }
+
+  ctx.save();
+  ctx.translate(x + ox, y + oy);
+  ctx.rotate(tilt);
+
+  // body
+  ctx.strokeStyle = SHIRT;
+  ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(0, -60); ctx.stroke();
+
+  // head
+  ctx.strokeStyle = BLACK; ctx.fillStyle = SKIN;
+  ctx.beginPath(); ctx.arc(0, -70, 12, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // legs
+  ctx.strokeStyle = PANTS;
+  if (action === 'walk') {
+    ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(-10*facing, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(8*facing, -10); ctx.stroke();
+  } else if (action === 'bump') {
+    ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(-8, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(8, 0); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(-8, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(8, 0); ctx.stroke();
+  }
+
+  // arms
+  ctx.strokeStyle = SHIRT;
+  if (action === 'bump') {
+    // arms out reaching door
+    ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(20*facing, -45); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(20*facing, -60); ctx.stroke();
+  } else if (action === 'walk') {
+    ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(-15*facing, -42); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(12*facing, -42); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(-12, -40); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-55); ctx.lineTo(12, -40); ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function stars(x, y) {
+  const positions = [[-20,-10],[-5,-25],[12,-8],[20,-22],[-12,-35]];
+  ctx.font = 'bold 16px serif';
+  ctx.fillStyle = STAR;
+  for (let [dx,dy] of positions) {
+    ctx.fillText('★', x+dx, y+dy);
+  }
+  ctx.fillStyle = BLACK;
+  ctx.font = '13px Comic Sans MS';
+  ctx.fillText('OOF!!', x-18, y-45);
+}
+
+function speechBubble(x, y, text) {
+  ctx.fillStyle = WHITE;
+  ctx.strokeStyle = BLACK; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(x-40, y-50, 110, 30, 8);
+  ctx.fill(); ctx.stroke();
+  // tail
+  ctx.beginPath();
+  ctx.moveTo(x, y-20); ctx.lineTo(x-5, y-5); ctx.lineTo(x+10, y-22);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = BLACK;
+  ctx.font = '11px Comic Sans MS';
+  ctx.fillText(text, x-35, y-30);
+}
+
+// door open (ajar left)
+function doorOpen() {
+  ctx.fillStyle = '#5C3317';
+  ctx.beginPath();
+  ctx.moveTo(258, 140);
+  ctx.lineTo(268, 140);
+  ctx.lineTo(268, 200);
+  ctx.lineTo(258, 200);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle=BLACK; ctx.lineWidth=2; ctx.stroke();
+  // open door panel
+  ctx.fillStyle = DOOR;
+  ctx.save();
+  ctx.transform(1,0,-0.5,1, 302, 140);
+  ctx.fillRect(0, 0, 44, 60);
+  ctx.strokeStyle=BLACK; ctx.lineWidth=2;
+  ctx.strokeRect(0,0,44,60);
+  ctx.restore();
+}
+
+const scenes = [
+  () => {
+    clear(); building();
+    figure(100, 200, 1, 'walk');
+    cap.textContent = 'approaching the physics building...';
+  },
+  () => {
+    clear(); building();
+    figure(240, 200, 1, 'walk');
+    cap.textContent = 'nearly there!';
+  },
+  () => {
+    clear(); building();
+    // draw figure hitting door
+    figure(257, 200, 1, 'bump');
+    stars(285, 125);
+    cap.textContent = 'BONK';
+  },
+  () => {
+    clear(); building();
+    figure(257, 200, 1, 'bump');
+    stars(285, 125);
+    // pull sign
+    ctx.fillStyle = WHITE; ctx.strokeStyle=BLACK; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.roundRect(60, 130, 140, 36, 6); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=BLACK; ctx.font='12px Comic Sans MS';
+    ctx.fillText('pole of inaccessibility', 65, 148);
+    ctx.fillText('(door is locked)', 72, 162);
+    cap.textContent = 'of course it\'s locked';
+  },
+  () => {
+    clear(); building();
+    figure(180, 200, -1, 'walk');
+    speechBubble(195, 128, 'psych dept it is');
+    cap.textContent = 'switching paths...';
+  },
+  () => {
+    clear(); building();
+    figure(60, 200, -1, 'walk');
+    cap.textContent = 'no free lunch today';
+  },
+];
+
+let i = 0;
+function draw() { scenes[i](); }
+draw();
+c.addEventListener('click', () => {
+  i = (i + 1) % scenes.length;
+  draw();
+});
+</script>
+</body>
+</html>
